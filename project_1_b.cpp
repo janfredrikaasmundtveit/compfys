@@ -49,8 +49,7 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
      
       for (int i = 0; i <= n; i++){
 		x[i]= i*h;
-        g[i] = hh*f(i*h); // actual line
-        //g[i]=i	// just for testing
+        g[i] = hh*f(i*h);
         b[i]=2; // defining the matix (this is stupid)
         a[i]=-1;
         c[i]=-1;
