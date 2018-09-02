@@ -56,13 +56,13 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
       }
        	// gaussian eliminaton
 	 for (int i = 1; i < n; i++) {
-		b[i]=b[i]-(a[i]*c[i]/b[i-1]); // back sub
-		g[i]=g[i]-(a[i]*g[i-1])/b[i-1]; 
+		b[i]=b[i]-((a[i]*c[i-1])/b[i-1]); // back sub
+		g[i]=g[i]-((a[i]*g[i-1])/b[i-1]); 
       } 
 
        u[n-1] = g[n-1]/b[n-1];
       for (int i = n-2; i > 0; i--){
-       u[i] = (g[i]+c[i]*u[i+1])/b[i]; // forward sub
+        u[i] = (g[i]-(c[i]*u[i+1]))/b[i]; // forward sub
 }
  	// making file (not makefile) 
   	 
