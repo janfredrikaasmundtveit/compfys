@@ -45,6 +45,7 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
       double *u = new double [n+1];  double *x = new double [n+1];
       mat A(n+1,n+1,fill::zeros);
       vec b(n+1);
+      vec u(n+1);
      // mat L,U,P;
       A(n,n)=2;
       A(0,0)=2;
@@ -71,7 +72,7 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
 	double xval = x[i];
  	 double RelativeError = fabs((exact(xval)-u[i])/exact(xval));
          ofile << setw(15) << setprecision(8) << xval;
-         ofile << setw(15) << setprecision(8) << u[i];
+         ofile << setw(15) << setprecision(8) << u(i);
          ofile << setw(15) << setprecision(8) << exact(xval);
          ofile << setw(15) << setprecision(8) << log10(RelativeError) << endl;
       }
