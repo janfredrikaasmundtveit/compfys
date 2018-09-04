@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <cmath>
 #include <string>
+#include <time.h>
 // use namespace for output and input
 using namespace std;
  
@@ -17,6 +18,7 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
 
  int main(int argc, char *argv[])
  {
+ 	clock_t tStart = clock();
  	// creating a file containing number of intergrationpoints.
 	int n; 
     string filename;
@@ -77,9 +79,9 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
          ofile << setw(15) << setprecision(8) << exact(xval);
          ofile << setw(15) << setprecision(8) << log10(RelativeError) << endl;
       }
+      ofile << setw(15) << setprecision(8) <<  (double)(clock() - tStart)/CLOCKS_PER_SEC << endl;
       ofile.close();
-	
- 	delete [] a; delete [] b; delete [] c;  delete [] u; delete [] x; delete [] g;
+	  	delete [] a; delete [] b; delete [] c;  delete [] u; delete [] x; delete [] g;
  	}
  	return 0;
  }

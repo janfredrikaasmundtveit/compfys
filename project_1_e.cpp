@@ -1,14 +1,14 @@
 //project 1
-//project 1
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <cmath>
 #include <string>
 #include <time.h>
+#include <armadillo>
 // use namespace for output and input
 using namespace std;
- 
+ using namespace arma;
  ofstream ofile;
 // Functions used
 inline double f(double x){return 100.0*exp(-10.0*x);
@@ -42,28 +42,26 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
       fileout.append(argument);
       double h = 1.0/(n);
       double hh = h*h;
-      // Set up arrays a lower off diagonal, b main diagonal, c upper of diagonal, u unknown, g modifid f(x)
-      double *b = new double [n+1]; double *c=new double [n+1]; double *a = new double [n+1]; double *u = new double [n+1];
-      double *x = new double[n+1]; double *g =new double [n+1];
-    
-      u[0] = u[n] = 0.0; // boundary conditions
-      b[0] = b[n] = 2; // fixed elements of diagonal
-     
-      for (int i = 0; i <= n; i++){
-		x[i]= i*h;
-        g[i] = hh*f(i*h);
-        
-      }
-       	// gaussian eliminaton
-	 for (int i = 1; i < n; i++) {
-		b[i]=2-(1/b[i-1]); // back sub
-		g[i]=g[i]+(g[i-1]/b[i-1]); 
-      } 
+      double *u = new double [n+1];  double *x = new double [n+1];
+      mat A(n+1,n+1,fill::zeros);
+      vec b(n+1);
+     // mat L,U,P;
+      A(n,n)=2;
+      A(0,0)=2;
+      A(n,n-1)=-1;
+      A(n-1,n)=-1;
+      // do LU here.
+      b(0)=hh*f(0.0);
+      b(n)=hh*f(1.0);
+ 	for(int i=1;i<=n-1;i++){
+ 		A(i,i)=2;
+ 		A(i,i-1)=-1;
+ 		A(i-1,i)=-1;
+ 		b(i)=hh*f(i*h);
+ 	}
+ 	//lu(L,U,P,A);
 
-       u[n-1] = g[n-1]/b[n-1];
-      for (int i = n-2; i > 0; i--){
-        u[i] = (g[i]+(u[i+1]))/b[i]; // forward sub
-}
+
  	// making file (not makefile) 
   	 
       ofile.open(fileout);
@@ -79,7 +77,9 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
       }
             ofile << setw(15) << setprecision(8) <<  (double)(clock() - tStart)/CLOCKS_PER_SEC << endl;
       ofile.close();
-	  	delete [] a; delete [] b; delete [] c;  delete [] u; delete [] x; delete [] g;
+
+		//	A.print(); 	
+	   delete [] u; delete [] x; 
  	}
  	return 0;
  }
