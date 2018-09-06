@@ -71,7 +71,7 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
       ofile.open(fileout);
       ofile << setiosflags(ios::showpoint | ios::uppercase);
       //      ofile << "       x:             approx:          exact:       relative error" << endl;
-      for (int i = 1; i < n;i++) {
+      for (int i = 0; i < n;i++) {
 	double xval = x[i];
  	 double RelativeError = fabs((exact(xval)-u[i])/exact(xval));
          ofile << setw(15) << setprecision(8) << xval;
@@ -79,9 +79,10 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
          ofile << setw(15) << setprecision(8) << exact(xval);
          ofile << setw(15) << setprecision(8) << log10(RelativeError) << endl;
       }
-      ofile << setw(15) << setprecision(8) <<  (double)(clock() - tStart)/CLOCKS_PER_SEC << endl;
+    //  ofile << setw(15) << setprecision(8) <<  (double)(clock() - tStart)/CLOCKS_PER_SEC << endl;
       ofile.close();
 	  	delete [] a; delete [] b; delete [] c;  delete [] u; delete [] x; delete [] g;
  	}
+ 	 cout << (double)(clock() - tStart)/CLOCKS_PER_SEC << endl;
  	return 0;
  }
