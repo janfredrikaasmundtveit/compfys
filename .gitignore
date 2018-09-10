@@ -1,5 +1,7 @@
 # compiled files:
 *.o
+*.obj
+*.exe
 *.so
 *.a
 # temporary files:
