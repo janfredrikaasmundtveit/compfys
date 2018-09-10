@@ -65,23 +65,27 @@ inline double exact(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
         u[i] = (g[i]+(u[i+1]))/b[i]; // forward sub
 }
  	// making file (not makefile) 
-  	 
+  	 double *RelativeError=new double [n];
+     RelativeError[0]=0;
       ofile.open(fileout);
       ofile << setiosflags(ios::showpoint | ios::uppercase);
       double maxRelativeError=0.0;
       //      ofile << "       x:             approx:          exact:       relative error" << endl;
       for (int i = 1; i < n;i++) {
 	double xval = x[i];
- 	 double RelativeError = fabs((exact(xval)-u[i])/exact(xval)); 
-          if (RelativeError> maxRelativeError)
-          {
-            maxRelativeError =RelativeError;      }
+ 	  RelativeError[i] = fabs((exact(xval)-u[i])/exact(xval)); 
+                  
+                  
+                
+                    maxRelativeError=maxRelativeError+RelativeError[i];
+                 }
+                 maxRelativeError=maxRelativeError/n;
 
          ofile << setw(15) << setprecision(8) << log10(maxRelativeError) << endl;
-      } 
+       
          //   ofile << setw(15) << setprecision(8) << (double)(clock() - tStart)/CLOCKS_PER_SEC << endl;
       ofile.close();
-	  	delete [] a; delete [] b; delete [] c;  delete [] u; delete [] x; delete [] g;
+	  	delete [] a; delete [] b; delete [] c;  delete [] u; delete [] x; delete [] g; delete [] RelativeError;
  	}
   cout << (double)(clock() - tStart)/CLOCKS_PER_SEC << endl;
 
