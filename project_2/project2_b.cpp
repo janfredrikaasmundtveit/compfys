@@ -8,6 +8,8 @@
 // use namespace for output and input
 using namespace std;
 //using namespace arma;
+
+
 void Jacobi_rotate ( double**, double**, int, int, int);
 double offdiag(double**, int*, int*,int);
 void DeallocateMatrix(double **, int, int);
@@ -55,6 +57,7 @@ while ( maxnondiag > tolerance && iterations <= maxiter)
    maxnondiag= offdiag(A, &p, &q, n);
    Jacobi_rotate(A, R, p, q, n);
    iterations++;
+   cout<< p <<','<< q << endl; 
 }
 
 for (int i = 0; i < n; i++)
@@ -166,7 +169,7 @@ void Jacobi_rotate ( double **A, double **R, int k, int l, int n ){
 //  the offdiag function, using Armadillo
 double offdiag(double **A, int* p, int* q, int n)
 { //p=new int; q=new int;
-   int a,b;
+  
    double max;
    for (int i = 0; i < n; ++i)
    {
@@ -175,11 +178,11 @@ double offdiag(double **A, int* p, int* q, int n)
            double aij = fabs(A[i][j]);
            if ( aij > max)
            { 
-              max = aij;  a = i; b = j;
+              max = aij;  *p = i; *q = j;
            }
        }
    }
-   *p=a; *q=b;
+   
    return max;
 }
 
