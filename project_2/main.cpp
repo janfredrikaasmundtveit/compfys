@@ -4,32 +4,34 @@
 #include <cmath>
 #include <string>
 #include <time.h>
-//#include <armadillo>
+#include "linalg.h"
+#include "jacobi.h"
+#include "catch.hpp"
+#include <armadillo>
 // use namespace for output and input
 using namespace std;
+using namespace arma; 
 inline double V(double x){return 0.0;
 }
 //using namespace arma;
  ofstream ofile;
-/*
-void Jacobi_rotate ( double**, double**, int, int, int);
-double offdiag(double**, int*, int*,int);
-void DeallocateMatrix(double **, int, int);
-double ** AllocateMatrix(int, int);
-double ** MatrixMultiplication(double **, double **, int);
-*/
+
+double offdiag(double **A, int* p, int* q, int n);
 
 int main(int argc, char *argv[])
 {   string filename;
   filename = argv[1];
   int n=atoi(argv[2]); //segmentaition fault incomming
-  double h=1.0/(n);
+  double rmax=1.0;
+  double rmin=0.0; 
+  double h=(rmax-rmin)/(n+1);
   double hh=h*h;
   string fileout = filename;
   double **A=AllocateMatrix(n,n);
   double **R=AllocateMatrix(n,n);
   double **C=AllocateMatrix(n,n);
-  int maxiter=100;
+  mat B(n,n);
+  int maxiter=100000;
   double tolerance = 1.0E-10; 
 double maxnondiag=1.0;
 int iterations = 0;
@@ -38,18 +40,20 @@ for (int i = 0; i < n; i++)
 {
   if (i==j)
   {
-    A[i][j]=-2.0/(hh)+V(i*h);
+    A[i][j]=-2.0/(hh)+V(i);
     R[i][j]=1.0;
     C[i][j]=1.0;
+    B(i,j)=A[i][j];  
   }
   else if(i==j+1 || i==j-1){
     A[i][j]=1.0/hh;
-   
+    B(i,j)=A[i][j];
   }
   else {
 
     A[i][j]=0.0;
-     }
+    //B(i,j)=A[i][j]; 
+  }
 }
 
 }
@@ -60,7 +64,7 @@ for (int i = 0; i < n; i++)
   
 cout << A[i][j] << '|';  
 }}*/
-double sum, rij;
+clock_t tStartj = clock();
 while ( maxnondiag > tolerance && iterations <= maxiter)
 { for (int i = 0; i < n; i++)
 {for (int j = 0; j < n; j++)
@@ -75,12 +79,39 @@ while ( maxnondiag > tolerance && iterations <= maxiter)
 }}
   
    int p, q;
-   offdiag(A, &p, &q, n, &maxnondiag);
+   maxnondiag=offdiag(A, &p, &q, n);
    Jacobi_rotate(A, R, p, q, n);
    iterations++;
    R=MatrixMultiplication(R,C,n);
-    cout<< p <<','<< q << endl; 
+    cout<< p <<','<< q << endl;
+     
 }
+ cout <<'Jacobis method' << (double)(clock() - tStartj)/CLOCKS_PER_SEC << endl;
+clock_t tStarta = clock();
+vec eigen=eig_sym(B);
+int k;
+double A0=fabs(A[0][0]);
+for(int i=0; i < n; i++){
+    int j=0;
+    while(fabs(A[i][i]-eigen(j)>10E-8)){
+        if(fabs(A[i][i])<A0){
+          A0=fabs(A[i][i]);
+          k=i;
+        }
+
+        if(j==n){
+          cout<< 'wrong eigenvaues' << endl;
+          return 0;
+        }
+        j++;
+    }
+
+
+}
+
+  
+   cout <<'armadillo' << (double)(clock() - tStarta)/CLOCKS_PER_SEC << endl;
+
 
 /*
 for (int i = 0; i < n; i++)
@@ -99,7 +130,7 @@ for (int i = 0; i < n; i++)
 cout << R[i][j] << '|';  
 }}
 */
-//test R^TBR=A
+//test R^TR=I
 /*
 double **B=AllocateMatrix(n,n);
 for (int i = 0; i < n; i++)
@@ -107,8 +138,8 @@ for (int i = 0; i < n; i++)
 {C[i][j]=R[j][i];
 }
 }
-B=MatrixMultiplication(A,R,n);
-B=MatrixMultiplication(C,B,n);
+B=MatrixMultiplication(C,R,n);
+
 for (int i = 0; i < n; i++)
 { cout << endl;
   for (int j = 0; j < n; j++)
@@ -120,11 +151,13 @@ DeallocateMatrix(B,n,n);
 */
 ofile.open(fileout);
       ofile << setiosflags(ios::showpoint | ios::uppercase);
-      //      
-      for (int i = 0; i < n;i++){for(int j=0; j<n; j++) {
+      //rplace on for groundstate      
+      for (int i = 0; i < n;i++){
+        ofile << setw(15) << setprecision(8) << rmin+i*h;
+        for(int j=0; j<n; j++) {
  
           ofile << setw(15) << setprecision(8) << R[i][j];}
-         ofile << setw(15) << setprecision(8) <<A[i][i] << endl;}
+         ofile <<  '\n';}
 //cout << endl;
          ofile.close();
 cout << iterations;
@@ -135,89 +168,15 @@ DeallocateMatrix(C,n,n);
 return 0;
 }
 
-void DeallocateMatrix(double ** Matrix, int m, int n){
-  for(int i=0;i<m;i++)
-    delete[] Matrix[i];
-  delete[] Matrix;
-}
 
 
-double ** AllocateMatrix(int m, int n){
-  double ** Matrix;
-  Matrix = new double*[m];
-  for(int i=0;i<m;i++){
-    Matrix[i] = new double[n];
-    for(int j=0;j<m;j++)
-      Matrix[i][j] = 0.0;
-  }
-  return Matrix;
-}
 
-double ** MatrixMultiplication(double ** a, double **b, int n){
-  double **c = AllocateMatrix(n, n);
-  for(int i=0;i < n;i++){
-     for (int j=0 ; j < n;j++){
-       double sum = 0.0;
-       for (int k = 0; k < n; k++) sum += a[i][k]*b[k][j];
-       c[i][j] = sum;
-     }
-  }
-  return c;
-}
-
-void Jacobi_rotate ( double **A, double **R, int k, int l, int n ){
-  double s, c;
-  if ( A[k][l] != 0.0 ) {
-    double t, tau;
-    tau = (A[l][l] - A[k][k])/(2*A[k][l]);
-    
-    if ( tau >= 0 ) {
-      t = 1.0/(tau + sqrt(1.0 + tau*tau));
-    } else {
-      t = -1.0/(-tau +sqrt(1.0 + tau*tau));
-    }
-    
-    c = 1/sqrt(1+t*t);
-    s = c*t;
-  }
-   else {
-    c = 1.0;
-    s = 0.0;
-  }
-  double a_kk, a_ll, a_ik, a_il, r_ik, r_il;
-  a_kk = A[k][k];
-  a_ll = A[l][l];
-  A[k][k] = c*c*a_kk - 2.0*c*s*A[k][l] + s*s*a_ll;
-  A[l][l] = s*s*a_kk + 2.0*c*s*A[k][l] + c*c*a_ll;
-  A[k][l] = 0.0;  // hard-coding non-diagonal elements by hand
-  A[l][k] = 0.0;  // same here
-  for ( int i = 0; i < n; i++ ) {
-    if ( i != k && i != l ) {
-      a_ik = A[i][k];
-      a_il = A[i][l];
-      A[i][k] = c*a_ik - s*a_il;
-      A[k][i] = A[i][k];
-      A[i][l] = c*a_il + s*a_ik;
-      A[l][i] = A[i][l];
-    }
-
-//  And finally the new eigenvectors
-    //r_ik = R[i][k];
-    //r_il = R[i][l];
-  }
-    R[l][k] = s;
-    R[k][l] =- s;
-    R[k][k]=c;
-    R[l][l]=c;
-  
-  return;
-}
 
 //  the offdiag function, using Armadillo
 double offdiag(double **A, int* p, int* q, int n)
 { //p=new int; q=new int;
   
-   double max;
+   double max=0.0;
    for (int i = 0; i < n; ++i)
    {
        for ( int j = i+1; j < n; ++j)
@@ -232,6 +191,3 @@ double offdiag(double **A, int* p, int* q, int n)
    
    return max;
 }
-
-
-

@@ -134,8 +134,8 @@ return 0;
 
 
 
-void Jacobi_rotate ( mat *B, mat *S, int k, int l, int n )
-{ mat A= *B; mat R=*S;
+void Jacobi_rotate ( mat A, mat R, int k, int l, int n )
+{
   double s, c;
   if ( A(k,l) != 0.0 ) {
     double t, tau;
@@ -175,8 +175,7 @@ void Jacobi_rotate ( mat *B, mat *S, int k, int l, int n )
 
     R(i,k) = c*r_ik - s*r_il;
     R(i,l) = c*r_il + s*r_ik;
-  } 
-  B=A; S=R;
+  }
   return;
 }
 //  the offdiag function, using Armadillo
