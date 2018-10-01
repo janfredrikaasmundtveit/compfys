@@ -11,7 +11,7 @@
 // use namespace for output and input
 using namespace std;
 using namespace arma; 
-inline double V(double x){return 0.0;
+inline double V(double x){return x*x;
 }
 //using namespace arma;
  ofstream ofile;
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 {   string filename;
   filename = argv[1];
   int n=atoi(argv[2]); //segmentaition fault incomming
-  double rmax=1.0;
+  double rmax=10.0;
   double rmin=0.0; 
   double h=(rmax-rmin)/(n+1);
   double hh=h*h;
@@ -31,22 +31,24 @@ int main(int argc, char *argv[])
   double **R=AllocateMatrix(n,n);
   double **C=AllocateMatrix(n,n);
   mat B(n,n);
-  int maxiter=100000;
-  double tolerance = 1.0E-10; 
+  int maxiter=10E+8;
+ // double excact[3]={3.0,7.0,11.0};
+    double tolerance = 1.0E-10; 
 double maxnondiag=1.0;
 int iterations = 0;
 for (int i = 0; i < n; i++)
-{for (int j = 0; j < n; j++)
+{
+  for (int j = 0; j < n; j++)
 {
   if (i==j)
   {
-    A[i][j]=-2.0/(hh)+V(i);
+    A[i][j]=2.0/(hh)+V(i);
     R[i][j]=1.0;
     C[i][j]=1.0;
     B(i,j)=A[i][j];  
   }
   else if(i==j+1 || i==j-1){
-    A[i][j]=1.0/hh;
+    A[i][j]=-1.0/hh;
     B(i,j)=A[i][j];
   }
   else {
@@ -80,34 +82,48 @@ while ( maxnondiag > tolerance && iterations <= maxiter)
   
    int p, q;
    maxnondiag=offdiag(A, &p, &q, n);
-   Jacobi_rotate(A, R, p, q, n);
+   Jacobi_rotate(A, R, p, q, n); // 
    iterations++;
-   R=MatrixMultiplication(R,C,n);
+   R=MatrixMultiplication(R,C,n); //  can be comented out if only eigenvectors are not reqired
     cout<< p <<','<< q << endl;
      
 }
  cout <<'Jacobis method' << (double)(clock() - tStartj)/CLOCKS_PER_SEC << endl;
 clock_t tStarta = clock();
-vec eigen=eig_sym(B);
+
 int k;
 double A0=fabs(A[0][0]);
+vec eigen=eig_sym(B);
 for(int i=0; i < n; i++){
     int j=0;
-    while(fabs(A[i][i]-eigen(j)>10E-8)){
-        if(fabs(A[i][i])<A0){
+   if(fabs(A[i][i])<A0){
           A0=fabs(A[i][i]);
-          k=i;
+          k=i; // used to idenify which is the groundstate
         }
+   // while(fabs(A[i][i]-eigen(j))>10E-8){
+        
 
-        if(j==n){
+       //if(j==n){//this statment is unnessesary as segmentationfault will already have ocurred.
+        //  cout<< 'wrong eigenvaues' << endl;
+         // return 0;
+       // }
+       // j++;
+   // }
+}
+/*
+for(int i=0; i < 3; i++){
+    int j=0;
+    while(fabs(A[j][j]-excact[i])>10E-1){
+       
+        
+       if(j==n){//this statment is unnessesary as segmentationfault will already have ocurred.
           cout<< 'wrong eigenvaues' << endl;
-          return 0;
-        }
+          return 0;}
+         
         j++;
     }
-
-
 }
+
 
   
    cout <<'armadillo' << (double)(clock() - tStarta)/CLOCKS_PER_SEC << endl;
@@ -137,7 +153,7 @@ for (int i = 0; i < n; i++)
 {for (int j = 0; j < n; j++)
 {C[i][j]=R[j][i];
 }
-}
+} 
 B=MatrixMultiplication(C,R,n);
 
 for (int i = 0; i < n; i++)
@@ -154,10 +170,8 @@ ofile.open(fileout);
       //rplace on for groundstate      
       for (int i = 0; i < n;i++){
         ofile << setw(15) << setprecision(8) << rmin+i*h;
-        for(int j=0; j<n; j++) {
- 
-          ofile << setw(15) << setprecision(8) << R[i][j];}
-         ofile <<  '\n';}
+         ofile << setw(15) << setprecision(8) << R[i][k]<<endl;
+         }
 //cout << endl;
          ofile.close();
 cout << iterations;
