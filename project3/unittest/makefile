@@ -10,6 +10,7 @@ ${PROG} :	   	test-main.o  test-functions.o  factorial.o
 			${CPPflags} test-main.o test-functions.o factorial.o ${LIB} -o ${PROG}
 
 
+
 test-main.o :			test-main.cpp
 		        	${CPPflags} -c test-main.cpp
 
