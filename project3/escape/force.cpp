@@ -11,13 +11,13 @@
 #include "totforce.h"
 
 
-planet verletstep(planet p, coord prevF,double h){
-p.q.x=p.q.x+h*p.v.x-h*h*p.F.x/p.m;
-p.q.y=p.q.y+h*p.v.y-h*h*p.F.y/p.m;
-p.v.y=p.v.y-(p.F.y+prevF.y)*h/(2*p.m);
-p.v.x=p.v.x-(p.F.x+prevF.x)*h/(2*p.m);
+coord force(planet p1, planet p2,double b){
+double pi=acos(-1.0);
+double c=4*pi*pi;
+coord F;
+double R=p1.r()+p2.r();
+F.x=c*p1.m*p2.m*(p1.q.x-p2.q.x)/(pow(R,b));
+F.y=c*p1.m*p2.m*(p1.q.y-p2.q.y)/(pow(R,b));
 
-return p;
+return F;
 }
-
-
