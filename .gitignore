@@ -44,9 +44,9 @@ Trash
 doc/Projects/2016/Project2/.out.copyright
 
 doc/Projects/2016/Project2/.project2_2016.copyright
-
+*.txt
 *.exerinfo
-
+*.png
 *.dlog
 
 
